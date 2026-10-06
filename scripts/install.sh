@@ -41,7 +41,7 @@ WG_MTU=1280                    # = tunnel.DefaultMTU клиента
 CLIENT_LISTEN="127.0.0.1:9000" # = -listen клиента по умолчанию, Endpoint клиентского WG
 SYSCTL_FILE="/etc/sysctl.d/99-free-turn-proxy.conf"
 
-REPO="samosvalishe/free-turn-proxy"
+REPO="hackdiaz-dev/free-turn-proxy"
 IMAGE="ghcr.io/$REPO"
 RELEASES_URL="https://github.com/$REPO/releases"
 
