@@ -470,10 +470,18 @@ port_busy_udp() {
     [ -n "$(ss -Hlun "sport = :$1" 2>/dev/null || true)" ]
 }
 
+# firewalld запущен (на RHEL-семействе ufw нет, а правила iptables firewalld не учитывает).
+_firewalld_running() {
+    command -v firewall-cmd >/dev/null 2>&1 && firewall-cmd --state >/dev/null 2>&1
+}
+
 firewall_open_port() {
     local port=$1 proto=${2:-udp}
     if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -q "Status: active"; then
         ufw allow "${port}/${proto}" >/dev/null 2>&1 || true
+    elif _firewalld_running; then
+        firewall-cmd --add-port="${port}/${proto}" >/dev/null 2>&1 || true
+        firewall-cmd --permanent --add-port="${port}/${proto}" >/dev/null 2>&1 || true
     elif command -v iptables >/dev/null 2>&1; then
         if ! iptables -C INPUT -p "$proto" --dport "$port" -j ACCEPT 2>/dev/null; then
             iptables -I INPUT -p "$proto" --dport "$port" -j ACCEPT 2>/dev/null || true
@@ -488,6 +496,9 @@ firewall_close_port() {
     [ -n "$port" ] || return 0
     if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -q "Status: active"; then
         ufw delete allow "${port}/${proto}" >/dev/null 2>&1 || true
+    elif _firewalld_running; then
+        firewall-cmd --remove-port="${port}/${proto}" >/dev/null 2>&1 || true
+        firewall-cmd --permanent --remove-port="${port}/${proto}" >/dev/null 2>&1 || true
     elif command -v iptables >/dev/null 2>&1; then
         iptables -D INPUT -p "$proto" --dport "$port" -j ACCEPT 2>/dev/null || true
         command -v netfilter-persistent >/dev/null 2>&1 && netfilter-persistent save >/dev/null 2>&1 || true
@@ -1376,13 +1387,16 @@ _web_listening() {
 }
 
 # Строкой, а не функцией: исполняется вне скрипта (ExecStopPost, детач-обёртка). Зеркалит
-# firewall_open_port - ufw ИЛИ iptables, иначе снесём постоянное правило админа.
+# firewall_open_port - ufw, firewalld ИЛИ iptables, иначе снесём постоянное правило админа.
 _web_close_cmd() {
-    local port=$1 ufw_bin ipt_bin
+    local port=$1 ufw_bin ipt_bin fw_bin
     ufw_bin=$(command -v ufw 2>/dev/null || true)
     ipt_bin=$(command -v iptables 2>/dev/null || true)
+    fw_bin=$(command -v firewall-cmd 2>/dev/null || true)
     if [ -n "$ufw_bin" ] && ufw status 2>/dev/null | grep -q "Status: active"; then
         printf "%s delete allow %s/tcp >/dev/null 2>&1; exit 0" "$ufw_bin" "$port"
+    elif [ -n "$fw_bin" ] && "$fw_bin" --state >/dev/null 2>&1; then
+        printf "%s --remove-port=%s/tcp >/dev/null 2>&1; %s --permanent --remove-port=%s/tcp >/dev/null 2>&1; exit 0" "$fw_bin" "$port" "$fw_bin" "$port"
     elif [ -n "$ipt_bin" ]; then
         printf "%s -D INPUT -p tcp --dport %s -j ACCEPT >/dev/null 2>&1; exit 0" "$ipt_bin" "$port"
     else

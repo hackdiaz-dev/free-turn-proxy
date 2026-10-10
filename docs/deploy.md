@@ -104,4 +104,4 @@ sudo CLIENTS_FILE=/opt/free-turn-proxy/clients.json \
 
 ## Порт
 
-Откройте внешний порт по **UDP** (при `MODE=tcp` тоже): `sudo ufw allow 56000/udp`. Скрипт делает это сам.
+Откройте внешний порт по **UDP** (при `MODE=tcp` тоже): `sudo ufw allow 56000/udp` (firewalld: `sudo firewall-cmd --permanent --add-port=56000/udp && sudo firewall-cmd --reload`). Скрипт делает это сам.
