@@ -1,6 +1,6 @@
 module github.com/samosvalishe/free-turn-proxy
 
-go 1.26.7
+go 1.26.9
 
 require (
 	github.com/amnezia-vpn/amneziawg-go/v3 v3.1.20260814
@@ -16,9 +16,9 @@ require (
 	github.com/pion/turn/v5 v5.0.13
 	github.com/xtaci/kcp-go/v5 v5.6.72
 	github.com/xtaci/smux v1.5.57
-	golang.org/x/crypto v0.55.0
+	golang.org/x/crypto v0.57.0
 	golang.org/x/crypto/x509roots/fallback v0.0.0-20260824205408-89f4e9bb5b38
-	golang.org/x/net v0.58.0
+	golang.org/x/net v0.60.0
 )
 
 require (
@@ -39,10 +39,10 @@ require (
 	github.com/tjfoc/gmsm v1.4.1 // indirect
 	github.com/wlynxg/anet v0.0.5 // indirect
 	golang.org/x/mobile v0.0.0-20260821190718-4776eadac327 // indirect
-	golang.org/x/mod v0.40.0 // indirect
-	golang.org/x/sync v0.22.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/text v0.41.0 // indirect
+	golang.org/x/mod v0.41.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.49.0 // indirect
 	golang.zx2c4.com/wintun v0.0.0-20230126152724-0fa3db229ce2 // indirect
