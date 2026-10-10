@@ -429,11 +429,11 @@ gum_download() {
         [ -n "$bin" ] && install -m 0755 "$bin" /usr/local/bin/gum 2>/dev/null
     fi
     rm -rf "$tmp"
-    command -v gum >/dev/null 2>&1
+    type -P gum >/dev/null 2>&1
 }
 
 ensure_gum() {
-    command -v gum >/dev/null 2>&1 && { HAS_GUM=1; return 0; }
+    type -P gum >/dev/null 2>&1 && { HAS_GUM=1; return 0; }
     log_info "Установка gum ${GUM_VERSION}..."
     gum_download "$GUM_VERSION" && { HAS_GUM=1; return 0; }
     log_warn "gum недоступен - классический текстовый режим."
