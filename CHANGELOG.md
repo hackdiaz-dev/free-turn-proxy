@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.2](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.0.1...v4.0.2) (2026-10-10)
+
+
+### Bug Fixes
+
+* **installer:** firewalld support and gum detection ([513e462](https://github.com/hackdiaz-dev/free-turn-proxy/commit/513e462fc9ef5d59a75099304389f9611244141c))
+
 ## [4.0.1](https://github.com/samosvalishe/free-turn-proxy/compare/v4.0.0...v4.0.1) (2026-09-24)
 
 
