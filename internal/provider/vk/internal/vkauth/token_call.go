@@ -140,7 +140,7 @@ func (c *Client) solveCaptcha(
 			solveFn = c.defaultAutoSolve
 		}
 		if captchaErr.SessionToken != "" && captchaErr.RedirectURI != "" {
-			successToken, solveErr = solveFn(ctx, captchaErr, streamID, httpClient, profile)
+			successToken, solveErr = solveFn(ctx, captchaErr, streamID, c.dialer, httpClient, profile)
 			if solveErr != nil {
 				c.log.Warnf("[STREAM %d] [Captcha] Auto captcha failed: %v", streamID, solveErr)
 			}

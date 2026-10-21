@@ -4,7 +4,35 @@
     const { local: LOCAL, upstream: UPSTREAM } = window.__ftpCaptcha ?? {};
     const PROXY = '/generic_proxy?proxy_url=';
     const RESULT = '/local-captcha-result';
+    const POW_RESULT = window.__ftpCaptcha?.powPath;
     const CHECK = 'captchaNotRobot.check';
+
+    // In auto mode, use the actual browser's computed PoW envelope. This runs
+    // before VK's inline PoW script, so its final assignment is observable.
+    if (window.__ftpCaptcha?.capturePow && POW_RESULT) {
+        let powValue = window.captchaPowResult;
+        const capturePow = (value) => {
+            if (typeof value !== 'string') return;
+            const dot = value.indexOf('.');
+            if (dot < 0) return;
+            try {
+                const envelope = JSON.parse(atob(value.slice(dot + 1)));
+                if (!/^[0-9a-f]{64}$/.test(envelope.hash || '') || envelope.error || !envelope.telemetry) return;
+                const body = `pow=${encodeURIComponent(value)}`;
+                fetch(POW_RESULT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body,
+                }).then(() => showDone()).catch(() => {});
+            } catch {}
+        };
+        Object.defineProperty(window, 'captchaPowResult', {
+            configurable: true,
+            enumerable: true,
+            get: () => powValue,
+            set: (value) => { powValue = value; capturePow(value); },
+        });
+    }
 
     function rewriteUrl(url) {
         if (!url || typeof url !== 'string') return url;
