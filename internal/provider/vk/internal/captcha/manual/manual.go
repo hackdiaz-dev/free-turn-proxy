@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"context"
 	"crypto/rand"
+	"crypto/subtle"
 	_ "embed"
 	"encoding/base64"
 	"encoding/json"
@@ -731,7 +732,7 @@ func solveViaProxy(ctx context.Context, redirectURI string, dialer net.Dialer, p
 
 func powCaptureHandler(expectedPath string, keyCh chan<- string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != expectedPath {
+		if subtle.ConstantTimeCompare([]byte(r.URL.Path), []byte(expectedPath)) != 1 {
 			http.NotFound(w, r)
 			return
 		}
