@@ -57,7 +57,7 @@ func (c *Client) defaultAutoSolve(
 	return successToken, nil
 }
 
-func (c *Client) solveLegacyCaptcha(
+func (*Client) solveLegacyCaptcha(
 	ctx context.Context,
 	captchaErr *captcha.Error,
 	streamID int,

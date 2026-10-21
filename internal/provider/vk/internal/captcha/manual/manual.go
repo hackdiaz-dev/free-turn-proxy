@@ -323,10 +323,6 @@ func rewriteHTMLAttrsServerSide(html string, targetURL *neturl.URL) string {
 	return html
 }
 
-func rewriteCaptchaHTML(html string, targetURL *neturl.URL) string {
-	return rewriteCaptchaHTMLMode(html, targetURL, "")
-}
-
 func rewriteCaptchaHTMLMode(html string, targetURL *neturl.URL, powCapturePath string) string {
 	localOrigin := localCaptchaOrigin()
 	upstreamOrigin := targetOrigin(targetURL)

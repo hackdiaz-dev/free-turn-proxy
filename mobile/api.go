@@ -269,7 +269,7 @@ func parseStartConfig(raw []byte, withTunnel bool) (*config.Client, error) {
 	return cfg, nil
 }
 
-func startLocked(configJSON string, tunFD int, withTunnel bool) error {
+func startLocked(configJSON string, tunFD int, withTunnel bool) error { //nolint:funlen // лимит превышен на 3 оператора из-за обработчиков капчи; разбиение ухудшит читаемость
 	// До backend.Up дескриптор закрывается при ошибке инициализации.
 	ownFD := withTunnel
 	defer func() {

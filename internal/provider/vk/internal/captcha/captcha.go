@@ -208,7 +208,7 @@ func solve(
 	return "", fmt.Errorf("captcha attempts exhausted: %w", solveErr)
 }
 
-func (s *captchaSession) solveOnce(captchaErr *Error) (string, error) {
+func (s *captchaSession) solveOnce(captchaErr *Error) (string, error) { //nolint:funlen // лимит превышен на 4 оператора из-за ветки browser PoW; разбиение ухудшит читаемость
 	s.domain = captchaDomainFromRedirectURI(captchaErr.RedirectURI)
 	s.setPageURL(captchaErr.RedirectURI)
 	s.logger().Debugf("[Captcha] using domain=%s page=%s", s.domain, SafeURL(s.pageURL))

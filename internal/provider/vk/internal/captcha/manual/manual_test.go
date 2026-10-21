@@ -18,7 +18,7 @@ func TestPowCaptureHandlerRequiresSecretPath(t *testing.T) {
 	keyCh := make(chan string, 1)
 	handler := powCaptureHandler(path, keyCh)
 
-	wrongPath := httptest.NewRequest(http.MethodPost, "/local-captcha-pow/wrong-secret", strings.NewReader("pow="+url.QueryEscape(pow)))
+	wrongPath := httptest.NewRequestWithContext(context.Background(), http.MethodPost, "/local-captcha-pow/wrong-secret", strings.NewReader("pow="+url.QueryEscape(pow)))
 	wrongPath.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	wrongPathResponse := httptest.NewRecorder()
 	handler.ServeHTTP(wrongPathResponse, wrongPath)
@@ -26,7 +26,7 @@ func TestPowCaptureHandlerRequiresSecretPath(t *testing.T) {
 		t.Fatalf("wrong path status = %d, want %d", wrongPathResponse.Code, http.StatusNotFound)
 	}
 
-	request := httptest.NewRequest(http.MethodPost, path, strings.NewReader("pow="+url.QueryEscape(pow)))
+	request := httptest.NewRequestWithContext(context.Background(), http.MethodPost, path, strings.NewReader("pow="+url.QueryEscape(pow)))
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	response := httptest.NewRecorder()
 	handler.ServeHTTP(response, request)
@@ -62,7 +62,7 @@ func TestPowCaptureHandlerRejectsInvalidRequests(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			request := httptest.NewRequest(tc.method, path, strings.NewReader(tc.body))
+			request := httptest.NewRequestWithContext(context.Background(), tc.method, path, strings.NewReader(tc.body))
 			request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			response := httptest.NewRecorder()
 			handler.ServeHTTP(response, request)
