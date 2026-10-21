@@ -1,5 +1,21 @@
 # Changelog
 
+## [4.1.0](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.0.3...v4.1.0) (2026-10-21)
+
+
+### Features
+
+* **vk:** advanced captcha solving ([f6c1d91](https://github.com/hackdiaz-dev/free-turn-proxy/commit/f6c1d91396d4aa21a52d97b320cf3694bc0e661b))
+* **vk:** добавить продвинутый режим решения капчи ([60743a0](https://github.com/hackdiaz-dev/free-turn-proxy/commit/60743a0cba06af49d57dc319080042fca4433917))
+
+
+### Bug Fixes
+
+* **captcha:** back off after failed browser capture ([af206b1](https://github.com/hackdiaz-dev/free-turn-proxy/commit/af206b129bcf8ebe805f3404f7c3e63a061717a1))
+* **captcha:** constant-time capture path check, Go 1.26.10 in release workflow ([9b6f35c](https://github.com/hackdiaz-dev/free-turn-proxy/commit/9b6f35cd4267eb261d5b320d90f4f77a707d63d5))
+* **captcha:** validate browser PoW before use ([9e704c8](https://github.com/hackdiaz-dev/free-turn-proxy/commit/9e704c8f16ada9087463b4315f036864616a4543))
+* **config:** отключить продвинутую капчу по умолчанию ([a30b9f6](https://github.com/hackdiaz-dev/free-turn-proxy/commit/a30b9f6124e358ba5d9c176175e8f05a66ffdd02))
+
 ## [4.0.3](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.0.2...v4.0.3) (2026-10-10)
 
 
