@@ -2,6 +2,7 @@ package vk
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"sync"
@@ -58,10 +59,12 @@ func ProxyPowCapture(show func(url string), hide func()) PowCaptureFunc {
 		}
 		pow, err := manualcaptcha.CapturePowViaProxyWithPresenter(ctx, redirectURI, dialer, profile, show)
 		proxyPowCooldownMu.Lock()
-		if err != nil {
-			proxyPowCooldownUntil = time.Now().Add(proxyPowFailureCooldown)
-		} else {
+		if err == nil || errors.Is(err, context.Canceled) {
+			// Cancellation is caused by lifecycle events (for example, relay restart),
+			// not by a failed browser PoW capture. Do not suppress later attempts.
 			proxyPowCooldownUntil = time.Time{}
+		} else {
+			proxyPowCooldownUntil = time.Now().Add(proxyPowFailureCooldown)
 		}
 		proxyPowCooldownMu.Unlock()
 		return pow, err
