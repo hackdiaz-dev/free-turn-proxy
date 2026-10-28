@@ -58,15 +58,19 @@ func ProxyPowCapture(show func(url string), hide func()) PowCaptureFunc {
 			defer hide()
 		}
 		pow, err := manualcaptcha.CapturePowViaProxyWithPresenter(ctx, redirectURI, dialer, profile, show)
-		proxyPowCooldownMu.Lock()
-		if err == nil || errors.Is(err, context.Canceled) {
-			// Cancellation is caused by lifecycle events (for example, relay restart),
-			// not by a failed browser PoW capture. Do not suppress later attempts.
-			proxyPowCooldownUntil = time.Time{}
-		} else {
-			proxyPowCooldownUntil = time.Now().Add(proxyPowFailureCooldown)
-		}
-		proxyPowCooldownMu.Unlock()
+		recordPowCaptureResult(err)
 		return pow, err
 	}
+}
+
+// recordPowCaptureResult обновляет паузу после попытки захвата PoW.
+// Отмена контекста (перезапуск релея, остановка) не считается сбоем захвата.
+func recordPowCaptureResult(err error) {
+	proxyPowCooldownMu.Lock()
+	defer proxyPowCooldownMu.Unlock()
+	if err == nil || errors.Is(err, context.Canceled) {
+		proxyPowCooldownUntil = time.Time{}
+		return
+	}
+	proxyPowCooldownUntil = time.Now().Add(proxyPowFailureCooldown)
 }
