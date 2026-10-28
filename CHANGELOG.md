@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.1.1](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.1.0...v4.1.1) (2026-10-28)
+
+
+### Bug Fixes
+
+* **captcha:** do not start PoW cooldown on capture cancellation ([a3fb2ab](https://github.com/hackdiaz-dev/free-turn-proxy/commit/a3fb2ab190503a829be08e62a7da964cf138e5b5))
+* **captcha:** extract PoW cooldown logic and cover cancellation with a test ([d2374cf](https://github.com/hackdiaz-dev/free-turn-proxy/commit/d2374cfa3cb4fc9137b4958b558b7d7930404409))
+
 ## [4.1.0](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.0.3...v4.1.0) (2026-10-21)
 
 
