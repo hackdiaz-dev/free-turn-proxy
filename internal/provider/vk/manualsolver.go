@@ -2,6 +2,7 @@ package vk
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"sync"
@@ -57,13 +58,19 @@ func ProxyPowCapture(show func(url string), hide func()) PowCaptureFunc {
 			defer hide()
 		}
 		pow, err := manualcaptcha.CapturePowViaProxyWithPresenter(ctx, redirectURI, dialer, profile, show)
-		proxyPowCooldownMu.Lock()
-		if err != nil {
-			proxyPowCooldownUntil = time.Now().Add(proxyPowFailureCooldown)
-		} else {
-			proxyPowCooldownUntil = time.Time{}
-		}
-		proxyPowCooldownMu.Unlock()
+		recordPowCaptureResult(err)
 		return pow, err
 	}
+}
+
+// recordPowCaptureResult обновляет паузу после попытки захвата PoW.
+// Отмена контекста (перезапуск релея, остановка) не считается сбоем захвата.
+func recordPowCaptureResult(err error) {
+	proxyPowCooldownMu.Lock()
+	defer proxyPowCooldownMu.Unlock()
+	if err == nil || errors.Is(err, context.Canceled) {
+		proxyPowCooldownUntil = time.Time{}
+		return
+	}
+	proxyPowCooldownUntil = time.Now().Add(proxyPowFailureCooldown)
 }
