@@ -2,6 +2,7 @@
 package netctl
 
 import (
+	"net"
 	"sync/atomic"
 	"syscall"
 )
@@ -25,4 +26,14 @@ func Apply(network, address string, c syscall.RawConn) error {
 		return (*fn)(network, address, c)
 	}
 	return nil
+}
+
+// NoMPTCP отключает MPTCP у слушателя. Go 1.24+ включает его по умолчанию,
+// а это лишняя поверхность атаки на баг ядра CVE-2026-98432.
+func NoMPTCP(cfg *net.ListenConfig) *net.ListenConfig {
+	if cfg == nil {
+		cfg = &net.ListenConfig{}
+	}
+	cfg.SetMultipathTCP(false)
+	return cfg
 }

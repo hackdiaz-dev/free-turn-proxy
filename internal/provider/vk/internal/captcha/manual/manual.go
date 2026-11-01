@@ -25,6 +25,7 @@ import (
 
 	"github.com/samosvalishe/free-turn-proxy/internal/client/ish"
 	"github.com/samosvalishe/free-turn-proxy/internal/logx"
+	"github.com/samosvalishe/free-turn-proxy/internal/netctl"
 	"github.com/samosvalishe/free-turn-proxy/internal/provider/vk/internal/browserprofile"
 	"github.com/samosvalishe/free-turn-proxy/internal/provider/vk/internal/captcha"
 	"github.com/samosvalishe/free-turn-proxy/internal/provider/vk/internal/personanet"
@@ -351,12 +352,12 @@ func rewriteCaptchaHTMLMode(html string, targetURL *neturl.URL, powCapturePath s
 	}
 }
 
-func startCaptchaServer(srv *http.Server, logPrefix string) error {
+func startCaptchaServer(ctx context.Context, srv *http.Server, logPrefix string) error {
 	var listenErrs []string
 	var listening bool
 
 	for _, addr := range localCaptchaListenAddrs() {
-		listener, err := net.Listen("tcp", addr) //nolint:noctx
+		listener, err := netctl.NoMPTCP(nil).Listen(ctx, "tcp", addr)
 		if err != nil {
 			listenErrs = append(listenErrs, fmt.Sprintf("%s (%v)", addr, err))
 			continue
@@ -386,7 +387,7 @@ func startCaptchaServer(srv *http.Server, logPrefix string) error {
 func runCaptchaServerAndWait(ctx context.Context, handler http.Handler, captchaURL string, keyCh <-chan string, logPrefix string, present func(string)) (string, error) {
 	srv := &http.Server{Handler: handler, ReadHeaderTimeout: 10 * time.Second}
 
-	if err := startCaptchaServer(srv, logPrefix); err != nil {
+	if err := startCaptchaServer(ctx, srv, logPrefix); err != nil {
 		return "", err
 	}
 
