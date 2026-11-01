@@ -2,6 +2,8 @@ module github.com/samosvalishe/free-turn-proxy
 
 go 1.26.10
 
+godebug multipathtcp=0
+
 require (
 	github.com/amnezia-vpn/amneziawg-go/v3 v3.1.20260814
 	github.com/bogdanfinn/fhttp v0.6.8
