@@ -25,6 +25,7 @@ import (
 
 	"github.com/samosvalishe/free-turn-proxy/internal/client/ish"
 	"github.com/samosvalishe/free-turn-proxy/internal/logx"
+	"github.com/samosvalishe/free-turn-proxy/internal/netctl"
 	"github.com/samosvalishe/free-turn-proxy/internal/provider/vk/internal/browserprofile"
 	"github.com/samosvalishe/free-turn-proxy/internal/provider/vk/internal/captcha"
 	"github.com/samosvalishe/free-turn-proxy/internal/provider/vk/internal/personanet"
@@ -356,7 +357,7 @@ func startCaptchaServer(srv *http.Server, logPrefix string) error {
 	var listening bool
 
 	for _, addr := range localCaptchaListenAddrs() {
-		listener, err := net.Listen("tcp", addr) //nolint:noctx
+		listener, err := netctl.NoMPTCP(nil).Listen(context.Background(), "tcp", addr)
 		if err != nil {
 			listenErrs = append(listenErrs, fmt.Sprintf("%s (%v)", addr, err))
 			continue
