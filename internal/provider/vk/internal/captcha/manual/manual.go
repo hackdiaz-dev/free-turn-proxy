@@ -352,12 +352,12 @@ func rewriteCaptchaHTMLMode(html string, targetURL *neturl.URL, powCapturePath s
 	}
 }
 
-func startCaptchaServer(srv *http.Server, logPrefix string) error {
+func startCaptchaServer(ctx context.Context, srv *http.Server, logPrefix string) error {
 	var listenErrs []string
 	var listening bool
 
 	for _, addr := range localCaptchaListenAddrs() {
-		listener, err := netctl.NoMPTCP(nil).Listen(context.Background(), "tcp", addr)
+		listener, err := netctl.NoMPTCP(nil).Listen(ctx, "tcp", addr)
 		if err != nil {
 			listenErrs = append(listenErrs, fmt.Sprintf("%s (%v)", addr, err))
 			continue
@@ -387,7 +387,7 @@ func startCaptchaServer(srv *http.Server, logPrefix string) error {
 func runCaptchaServerAndWait(ctx context.Context, handler http.Handler, captchaURL string, keyCh <-chan string, logPrefix string, present func(string)) (string, error) {
 	srv := &http.Server{Handler: handler, ReadHeaderTimeout: 10 * time.Second}
 
-	if err := startCaptchaServer(srv, logPrefix); err != nil {
+	if err := startCaptchaServer(ctx, srv, logPrefix); err != nil {
 		return "", err
 	}
 
