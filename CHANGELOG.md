@@ -1,5 +1,15 @@
 # Changelog
 
+## [4.1.2](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.1.1...v4.1.2) (2026-11-01)
+
+
+### Bug Fixes
+
+* **security:** disable MPTCP explicitly on every TCP listener ([00c6d19](https://github.com/hackdiaz-dev/free-turn-proxy/commit/00c6d195f3ccae22a14d113bab8ac49be1fd1a90))
+* **security:** disable MPTCP explicitly on every TCP listener (CVE-2026-98432) ([9873fda](https://github.com/hackdiaz-dev/free-turn-proxy/commit/9873fdab7cb2bd6b61c0071728b2afb56f024dd4))
+* **security:** disable MPTCP listeners by default ([53b5a39](https://github.com/hackdiaz-dev/free-turn-proxy/commit/53b5a39f50bb23afa8f453bc1ec4fc29ca780979))
+* **security:** disable MPTCP listeners by default (CVE-2026-98432) ([2810327](https://github.com/hackdiaz-dev/free-turn-proxy/commit/2810327c6c03ff40966d9c56eef69dc3e8372a18))
+
 ## [4.1.1](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.1.0...v4.1.1) (2026-10-28)
 
 
