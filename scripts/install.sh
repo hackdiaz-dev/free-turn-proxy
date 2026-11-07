@@ -6,6 +6,13 @@ umask 077
 
 PROTO_VERSION=3
 
+# Полный вывод шагов установки: хвост показывается при сбое шага или неожиданном выходе.
+_FT_LOG=""
+_ft_log_init() {
+    [ -z "$_FT_LOG" ] || return 0
+    _FT_LOG=$(mktemp "${TMPDIR:-/tmp}/freeturn-install.XXXXXX" 2>/dev/null) || _FT_LOG=/dev/null
+}
+
 PREFIX="${FT_PREFIX:-/opt/free-turn-proxy}"
 CONF_FILE="$PREFIX/install.conf"
 LOCKFILE="$PREFIX/control.lock"
@@ -166,6 +173,7 @@ fail() {
     local code=$1 msg=${2:-$1}
     if [ "$_IS_RPC" != 1 ]; then
         log_error "$msg"
+        _EMITTED=1
         exit 1
     fi
     [ "$_EMITTED" -eq 1 ] && exit 1
@@ -181,7 +189,16 @@ die() { fail internal "$1"; }
 _on_exit() {
     local rc=$?
     [ "$_EMITTED" -eq 1 ] && return
-    [ "$_IS_RPC" -ne 1 ] && return
+    if [ "$_IS_RPC" -ne 1 ]; then
+        if [ "$rc" -ne 0 ]; then
+            log_error "Установка прервана на этапе «$_STAGE» (код $rc)."
+            if [ -n "$_FT_LOG" ] && [ -s "$_FT_LOG" ]; then
+                log_error "Последние 20 строк лога шагов:"
+                tail -n 20 "$_FT_LOG" >&2
+            fi
+        fi
+        return
+    fi
     _EMITTED=1
     printf '{"proto":%d,"result":"err","code":"internal","msg":"unexpected exit %d","stage":"%s","logs":[%s]}\n' \
         "$PROTO_VERSION" "$rc" "$_STAGE" "$(_logs_json)"
@@ -343,14 +360,19 @@ ui_spin() {
         if [ "$rc" -eq 0 ]; then
             log_success "$title"
         else
-            log_error "$title - ошибка (код $rc)"
-            tail -n 40 "$out" | gum style --border rounded --border-foreground "$MD_ERROR" --padding "0 1"
+            log_error "Шаг «$title» не удался (код $rc). Последние 20 строк:"
+            tail -n 20 "$out" | gum style --border rounded --border-foreground "$MD_ERROR" --padding "0 1"
         fi
     else
         log_info "$title..."
         "$@" >"$out" 2>&1 || rc=$?
-        [ "$rc" -eq 0 ] || tail -n 40 "$out" >&2
+        if [ "$rc" -ne 0 ]; then
+            log_error "Шаг «$title» не удался (код $rc). Последние 20 строк:"
+            tail -n 20 "$out" >&2
+        fi
     fi
+    _ft_log_init
+    { printf '== %s (код %s)\n' "$title" "$rc"; cat "$out"; } >>"$_FT_LOG" 2>/dev/null || true
     rm -f "$out"
     return "$rc"
 }
@@ -364,6 +386,7 @@ step() {
         [ "$rc" -eq 0 ] || log_error "$title: $(printf '%s' "$out" | tail -n 5)"
         return "$rc"
     fi
+    _STAGE=$title
     ui_spin "$title" "$@"
 }
 
@@ -663,9 +686,18 @@ ft_remove() {
     rm -f "$ENVFILE"
 }
 
+# get.docker.com качаем в файл: в `curl | sh` сбой curl давал пустой stdin и успешный выход sh.
+_install_docker() {
+    local tmp rc=0
+    tmp=$(mktemp) || return 1
+    _dl https://get.docker.com "$tmp" && sh "$tmp" || rc=$?
+    rm -f "$tmp"
+    return "$rc"
+}
+
 ensure_docker() {
     if ! command -v docker >/dev/null 2>&1; then
-        step "Установка Docker" sh -c 'curl -fsSL https://get.docker.com | sh' \
+        step "Установка Docker" _install_docker \
             || fail docker_failed "установка Docker не удалась"
     fi
     docker info >/dev/null 2>&1 || systemctl start docker >/dev/null 2>&1 || service docker start >/dev/null 2>&1 || true
