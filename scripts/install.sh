@@ -396,7 +396,8 @@ step() {
 with_lock() {
     command -v flock >/dev/null 2>&1 || return 0
     mkdir -p "$PREFIX" 2>/dev/null || return 0
-    exec 8>"$LOCKFILE" 2>/dev/null || return 0
+    # Группа обязательна: у голого `exec ... 2>/dev/null` перенаправление stderr остаётся навсегда.
+    { exec 8>"$LOCKFILE"; } 2>/dev/null || return 0
     flock -w 300 8 2>/dev/null || true
 }
 

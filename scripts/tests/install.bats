@@ -440,3 +440,9 @@ need_jq() { command -v jq >/dev/null 2>&1 || skip "нет jq"; }
     [ "$status" -ne 0 ]
     [[ "$output" == *"Установка прервана на этапе «Загрузка образа»"* ]]
 }
+
+@test "with_lock не глушит stderr навсегда" {
+    command -v flock >/dev/null 2>&1 || skip "нет flock"
+    run bash -c 'source "$1"; with_lock; echo err-visible >&2' _ "$SCRIPT"
+    [[ "$output" == *"err-visible"* ]]
+}
