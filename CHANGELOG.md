@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.1.3](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.1.2...v4.1.3) (2026-11-08)
+
+
+### Bug Fixes
+
+* **deps:** bump brotli and compress ([8404d81](https://github.com/hackdiaz-dev/free-turn-proxy/commit/8404d81033b740af1f488e7f5e1044b4b16b09dc))
+* **deps:** bump brotli and compress (GO-2026-6888, GO-2026-6865) ([8bab2c0](https://github.com/hackdiaz-dev/free-turn-proxy/commit/8bab2c0b7941e237c8fd1605d9f1d650cd86e342))
+* **install:** keep stderr attached after taking the lock ([aec0410](https://github.com/hackdiaz-dev/free-turn-proxy/commit/aec0410cf30d359cd52347b76400524d1bd27cff))
+* **install:** stop on a failed step and show the last 20 log lines ([e2cd7c3](https://github.com/hackdiaz-dev/free-turn-proxy/commit/e2cd7c32166066594a8a5bad4c65f78fcbf98de4))
+* **install:** stop on a failed step and show the last 20 log lines ([c489dce](https://github.com/hackdiaz-dev/free-turn-proxy/commit/c489dce78d9518942e2cde1e5055b3ef85136d5e))
+
 ## [4.1.2](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.1.1...v4.1.2) (2026-11-01)
 
 
