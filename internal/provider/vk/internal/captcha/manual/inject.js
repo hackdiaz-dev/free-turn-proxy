@@ -3,7 +3,7 @@
 
     const { local: LOCAL, upstream: UPSTREAM } = window.__ftpCaptcha ?? {};
     const PROXY = '/generic_proxy?proxy_url=';
-    const RESULT = '/local-captcha-result';
+    const RESULT = window.__ftpCaptcha?.resultPath;
     const POW_RESULT = window.__ftpCaptcha?.powPath;
     const CHECK = 'captchaNotRobot.check';
 
@@ -60,7 +60,7 @@
     const extractToken = (data) => data?.response?.success_token;
 
     function sendToken(token) {
-        if (!token) return;
+        if (!token || !RESULT) return;
         const body = `token=${encodeURIComponent(token)}`;
 
         // sendBeacon переживает уход со страницы (mobile Safari)
