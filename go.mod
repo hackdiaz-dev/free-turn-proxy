@@ -1,6 +1,6 @@
 module github.com/samosvalishe/free-turn-proxy
 
-go 1.26.10
+go 1.26.11
 
 godebug multipathtcp=0
 
