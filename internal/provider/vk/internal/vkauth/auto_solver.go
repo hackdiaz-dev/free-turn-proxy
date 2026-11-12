@@ -13,7 +13,7 @@ import (
 	tlsclient "github.com/bogdanfinn/tls-client"
 )
 
-const browserPowCaptureTimeout = 12 * time.Second
+const browserPowCaptureTimeout = 30 * time.Second
 
 func (c *Client) defaultAutoSolve(
 	ctx context.Context,
@@ -51,7 +51,11 @@ func (c *Client) defaultAutoSolve(
 	}
 	successToken, err := captcha.SolveWithBrowserPow(ctx, captchaErr, streamID, client, profile, log, browserPow)
 	if err != nil {
-		return "", err
+		if ctx.Err() != nil {
+			return "", ctx.Err()
+		}
+		log.Warnf("[STREAM %d] [Captcha] Browser PoW solve failed (%v); falling back to legacy automatic solver", streamID, err)
+		return c.solveLegacyCaptcha(ctx, captchaErr, streamID, client, profile)
 	}
 	log.Infof("[STREAM %d] [Captcha] solver succeeded", streamID)
 	return successToken, nil
