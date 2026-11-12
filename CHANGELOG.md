@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.1.4](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.1.3...v4.1.4) (2026-11-12)
+
+
+### Bug Fixes
+
+* **captcha:** browser PoW fallback and callback hardening ([1390c6b](https://github.com/hackdiaz-dev/free-turn-proxy/commit/1390c6b83bddee1580aac7a6d4dd91f579cd8e58))
+* **deps:** bump Go to 1.26.11 (GO-2026-6859) ([3483789](https://github.com/hackdiaz-dev/free-turn-proxy/commit/3483789e7ff0c96bc63cd22b48cd4cc2b4a213a3))
+
 ## [4.1.3](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.1.2...v4.1.3) (2026-11-08)
 
 
