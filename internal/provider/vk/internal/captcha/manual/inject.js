@@ -7,6 +7,16 @@
     const POW_RESULT = window.__ftpCaptcha?.powPath;
     const CHECK = 'captchaNotRobot.check';
 
+    function proxyUrl(abs) {
+        try {
+            const url = new URL(abs);
+            if (url.protocol === 'https:') {
+                return '/_p/' + url.host + url.pathname + url.search;
+            }
+        } catch (e) { /* use the legacy proxy URL below */ }
+        return PROXY + encodeURIComponent(abs);
+    }
+
     // In auto mode, use the actual browser's computed PoW envelope. This runs
     // before VK's inline PoW script, so its final assignment is observable.
     if (window.__ftpCaptcha?.capturePow && POW_RESULT) {
@@ -38,8 +48,8 @@
         if (!url || typeof url !== 'string') return url;
         if (url.startsWith(LOCAL)) return url;
         if (url.startsWith(UPSTREAM)) return LOCAL + url.slice(UPSTREAM.length);
-        if (url.startsWith('//')) return PROXY + encodeURIComponent(location.protocol + url);
-        if (url.startsWith('http://') || url.startsWith('https://')) return PROXY + encodeURIComponent(url);
+        if (url.startsWith('//')) return proxyUrl(new URL(UPSTREAM).protocol + url);
+        if (url.startsWith('http://') || url.startsWith('https://')) return proxyUrl(url);
         return url;
     }
 
