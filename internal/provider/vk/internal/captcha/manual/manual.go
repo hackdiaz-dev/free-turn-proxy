@@ -264,6 +264,20 @@ var htmlURLAttrSingleRe = regexp.MustCompile(`(?i)((?:src|href|action)\s*=\s*)'(
 var htmlScriptContentRe = regexp.MustCompile(`(?is)(<script[^>]*>)(.*?)(</script>)`)
 var htmlStyleContentRe = regexp.MustCompile(`(?is)(<style[^>]*>)(.*?)(</style>)`)
 
+// pathProxyURL keeps the original host and path visible to the browser, so
+// relative assets requested by webpack resolve against the correct CDN path.
+func pathProxyURL(abs string) string {
+	u, err := neturl.Parse(abs)
+	if err != nil || u.Host == "" || u.Scheme != "https" {
+		return "/generic_proxy?proxy_url=" + neturl.QueryEscape(abs)
+	}
+	p := "/_p/" + u.Host + u.EscapedPath()
+	if u.RawQuery != "" {
+		p += "?" + u.RawQuery
+	}
+	return p
+}
+
 // rewriteHTMLAttrsServerSide переписывает абсолютные и protocol-relative URL
 // в src/href/action HTML на стороне сервера. URL, совпадающие с upstream origin,
 // идут на localhost; остальные - через /generic_proxy, чтобы cross-domain
@@ -284,8 +298,8 @@ func rewriteHTMLAttrsServerSide(html string, targetURL *neturl.URL) string {
 		if strings.HasPrefix(absURL, localOrigin) {
 			return rawURL
 		}
-		// прочие абсолютные URL -> через generic_proxy
-		return "/generic_proxy?proxy_url=" + neturl.QueryEscape(absURL)
+		// Остальные абсолютные URL идут через path-preserving proxy URL.
+		return pathProxyURL(absURL)
 	}
 
 	var placeholders = make(map[string]string)
@@ -664,10 +678,9 @@ func solveViaProxy(ctx context.Context, redirectURI string, dialer net.Dialer, p
 		mux.HandleFunc("/local-captcha-pow/", powCaptureHandler(powCapturePath, powCh))
 	}
 
-	mux.HandleFunc("/generic_proxy", func(w http.ResponseWriter, r *http.Request) {
-		targetAuthURL := r.URL.Query().Get("proxy_url")
-		targetParsed, err := neturl.Parse(targetAuthURL)
-		if err != nil || targetParsed.Host == "" {
+	serveGeneric := func(w http.ResponseWriter, r *http.Request, targetParsed *neturl.URL) {
+		targetAuthURL := targetParsed.String()
+		if targetParsed.Host == "" {
 			http.Error(w, "Bad URL", http.StatusBadRequest)
 			return
 		}
@@ -679,12 +692,12 @@ func solveViaProxy(ctx context.Context, redirectURI string, dialer net.Dialer, p
 			Transport: transport,
 			Rewrite: func(req *httputil.ProxyRequest) {
 				req.Out.URL.Path = targetParsed.Path
+				req.Out.URL.RawPath = targetParsed.RawPath
 				req.Out.URL.RawQuery = targetParsed.RawQuery
 				rewriteProxyRequest(req.Out, targetParsed)
 			},
 			ModifyResponse: func(res *http.Response) error {
-				// убираем security-заголовки, блокирующие cross-origin загрузку
-				// статики (JS/CSS) при проксировании.
+				// Remove security headers that block proxied cross-origin static assets.
 				for _, h := range []string{
 					"Content-Security-Policy",
 					"Content-Security-Policy-Report-Only",
@@ -698,10 +711,7 @@ func solveViaProxy(ctx context.Context, redirectURI string, dialer net.Dialer, p
 				} {
 					res.Header.Del(h)
 				}
-				// разрешаем cross-origin доступ к ресурсу
 				res.Header.Set("Access-Control-Allow-Origin", "*")
-
-				// captchaNotRobot.check идёт через /generic_proxy на api.vk.com/api.vk.ru.
 				if strings.Contains(targetAuthURL, "captchaNotRobot.check") {
 					bodyBytes, readErr := io.ReadAll(res.Body)
 					if readErr == nil {
@@ -714,11 +724,37 @@ func solveViaProxy(ctx context.Context, redirectURI string, dialer net.Dialer, p
 						}
 					}
 				}
-
 				return nil
 			},
 		}
 		genericReverse.ServeHTTP(w, r)
+	}
+	mux.HandleFunc("/generic_proxy", func(w http.ResponseWriter, r *http.Request) {
+		targetParsed, err := neturl.Parse(r.URL.Query().Get("proxy_url"))
+		if err != nil || targetParsed.Host == "" {
+			http.Error(w, "Bad URL", http.StatusBadRequest)
+			return
+		}
+		serveGeneric(w, r, targetParsed)
+	})
+	mux.HandleFunc("/_p/", func(w http.ResponseWriter, r *http.Request) {
+		// Preserve the upstream path so webpack-relative chunks resolve to their CDN directory.
+		escaped := strings.TrimPrefix(r.URL.EscapedPath(), "/_p/")
+		host, path, ok := strings.Cut(escaped, "/")
+		if !ok || host == "" {
+			http.Error(w, "Bad URL", http.StatusBadRequest)
+			return
+		}
+		escapedURL := "https://" + host + "/" + path
+		if r.URL.RawQuery != "" {
+			escapedURL += "?" + r.URL.RawQuery
+		}
+		targetParsed, err := neturl.Parse(escapedURL)
+		if err != nil {
+			http.Error(w, "Bad URL", http.StatusBadRequest)
+			return
+		}
+		serveGeneric(w, r, targetParsed)
 	})
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
