@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.5](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.1.4...v4.1.5) (2026-11-13)
+
+
+### Bug Fixes
+
+* **captcha:** load relative chunks of the manual captcha page ([1d601c9](https://github.com/hackdiaz-dev/free-turn-proxy/commit/1d601c90ac3d21b5bfaabc52a9cf0a1dcf809373))
+
 ## [4.1.4](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.1.3...v4.1.4) (2026-11-12)
 
 
