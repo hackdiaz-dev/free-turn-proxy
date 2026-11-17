@@ -69,7 +69,13 @@ func ParseClient(args []string, errOut io.Writer) (*Client, error) {
 	}
 
 	if fs.NArg() > 0 && strings.HasPrefix(fs.Arg(0), uriScheme) {
-		u, err := uri.Parse(fs.Arg(0))
+		link := fs.Arg(0)
+		// flag прекращает разбор на первом аргументе без дефиса: флаги после ссылки
+		// (`client freeturn://... -link ...`) остались бы неразобранными в хвосте.
+		if err := fs.Parse(fs.Args()[1:]); err != nil {
+			return nil, err
+		}
+		u, err := uri.Parse(link)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse freeturn:// URI: %w", err)
 		}
