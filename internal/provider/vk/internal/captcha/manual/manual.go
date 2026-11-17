@@ -426,9 +426,10 @@ func runCaptchaServerAndWait(ctx context.Context, handler http.Handler, captchaU
 
 	powCapture := strings.Contains(logPrefix, "PoW capture")
 	if powCapture {
-		// Полный адрес страницы - для хоста, который открывает её сам (скрытый WebView
-		// приложения, запускающего CLI), а не системным браузером из present.
-		Log().Infof("%s: waiting for browser PoW computation at %s", logPrefix, captchaURL)
+		Log().Infof("%s: waiting for browser PoW computation at %s", logPrefix, captcha.SafeURL(captchaURL))
+		// Полный адрес (session_token в query) - только в -debug: для хоста, который открывает
+		// страницу сам (скрытый WebView приложения, запускающего CLI), а не браузером из present.
+		Log().Debugf("%s: browser PoW page %s", logPrefix, captchaURL)
 	} else {
 		Log().Warnf("%s: ACTION REQUIRED: manual captcha solving needed", logPrefix)
 		Log().Warnf("%s: if the browser did not open, go to %s", logPrefix, localCaptchaOrigin())
