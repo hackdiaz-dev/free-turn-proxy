@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.2.0](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.1.5...v4.2.0) (2026-11-17)
+
+
+### Features
+
+* **captcha:** -advanced-captcha flag for the CLI and the PoW page URL in the log ([7a76b33](https://github.com/hackdiaz-dev/free-turn-proxy/commit/7a76b3328b45b2af6003562191a0f7d5ee26ef9a))
+
+
+### Bug Fixes
+
+* **config:** accept flags after the freeturn:// link ([85446dc](https://github.com/hackdiaz-dev/free-turn-proxy/commit/85446dc3fffbd6bb8f5fb94126cc1d557f560cfe))
+
 ## [4.1.5](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.1.4...v4.1.5) (2026-11-13)
 
 
