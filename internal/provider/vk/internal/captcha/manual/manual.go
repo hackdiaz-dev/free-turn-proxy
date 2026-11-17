@@ -424,8 +424,12 @@ func runCaptchaServerAndWait(ctx context.Context, handler http.Handler, captchaU
 		}
 	}()
 
-	if strings.Contains(logPrefix, "PoW capture") {
-		Log().Infof("%s: waiting for browser PoW computation", logPrefix)
+	powCapture := strings.Contains(logPrefix, "PoW capture")
+	if powCapture {
+		Log().Infof("%s: waiting for browser PoW computation at %s", logPrefix, captcha.SafeURL(captchaURL))
+		// Полный адрес (session_token в query) - только в -debug: для хоста, который открывает
+		// страницу сам (скрытый WebView приложения, запускающего CLI), а не браузером из present.
+		Log().Debugf("%s: browser PoW page %s", logPrefix, captchaURL)
 	} else {
 		Log().Warnf("%s: ACTION REQUIRED: manual captcha solving needed", logPrefix)
 		Log().Warnf("%s: if the browser did not open, go to %s", logPrefix, localCaptchaOrigin())
@@ -435,8 +439,15 @@ func runCaptchaServerAndWait(ctx context.Context, handler http.Handler, captchaU
 
 	select {
 	case key := <-keyCh:
+		if powCapture {
+			// Страницу можно закрывать: сервер останавливается следом.
+			Log().Infof("%s: browser PoW received", logPrefix)
+		}
 		return key, nil
 	case <-ctx.Done():
+		if powCapture {
+			Log().Infof("%s: browser PoW wait ended: %v", logPrefix, ctx.Err())
+		}
 		return "", ctx.Err()
 	}
 }

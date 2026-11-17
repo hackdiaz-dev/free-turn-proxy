@@ -36,6 +36,7 @@ func ClientArgs(c *Client) []string {
 	addIf(c.Obf.Enabled(), "-obf-key", hex.EncodeToString(c.Obf.Key))
 	addIf(c.Obf.Timing > 0, "-obf-timing", c.Obf.Timing.String())
 	addIf(c.VK.ManualCaptcha, "-manual-captcha")
+	addIf(c.VK.AdvancedCaptcha, "-advanced-captcha")
 	addIf(c.VK.Platform != def.VK.Platform, "-platform", string(c.VK.Platform))
 	addIf(c.DNS.Mode != def.DNS.Mode, "-dns-mode", c.DNS.Mode)
 	addIf(len(c.DNS.Servers) > 0, "-dns-servers", strings.Join(c.DNS.Servers, ","))

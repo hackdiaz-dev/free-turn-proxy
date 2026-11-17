@@ -24,6 +24,7 @@ func TestClientArgsRoundTrip(t *testing.T) {
 		{"turn override", append(validClientArgs(), "-turn", "5.5.5.5", "-port", "3478")},
 		{"tuning", append(validClientArgs(), "-n", "3", "-streams-per-cred", "4")},
 		{"vk extras", append(validClientArgs(), "-manual-captcha", "-platform", "mobile")},
+		{"advanced captcha", append(validClientArgs(), "-advanced-captcha")},
 		{"multi links", []string{"-peer", "1.2.3.4:5000", "-links", "https://vk.ru/call/join/A,https://vk.ru/call/join/B"}},
 		{"misc", append(validClientArgs(), "-client-id", "deadbeef", "-listen", "127.0.0.1:1080", "-debug")},
 	}
