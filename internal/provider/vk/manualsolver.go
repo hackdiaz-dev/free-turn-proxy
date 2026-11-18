@@ -26,8 +26,11 @@ func ProxyManualSolver(show func(url string), hide func()) ManualSolverFunc {
 			return "", fmt.Errorf("manual captcha: no redirect_uri")
 		}
 
-		proxyManualMu.Lock()
-		defer proxyManualMu.Unlock()
+		unlock, err := lockCaptchaPage(ctx)
+		if err != nil {
+			return "", err
+		}
+		defer unlock()
 		if hide != nil {
 			defer hide()
 		}
@@ -36,8 +39,37 @@ func ProxyManualSolver(show func(url string), hide func()) ManualSolverFunc {
 	}
 }
 
+// lockCaptchaPage занимает локальную страницу капчи (порт 8765 один на процесс). С несколькими
+// -links у каждой ссылки свой провайдер и своя капча: без очереди второй провайдер получает
+// "bind: address already in use" и засчитывает это как проваленную ручную капчу.
+// Пока ждали, сессию могли свернуть или вышел таймаут ручной капчи - тогда страницу не
+// поднимаем, иначе пользователю покажется капча, которую уже никто не ждёт.
+func lockCaptchaPage(ctx context.Context) (unlock func(), err error) {
+	proxyManualMu.Lock()
+	if err := ctx.Err(); err != nil {
+		proxyManualMu.Unlock()
+		return nil, err
+	}
+	return proxyManualMu.Unlock, nil
+}
+
 // ProxyPowCapture exposes the in-app browser to the automatic PoW capture flow.
 func ProxyPowCapture(show func(url string), hide func()) PowCaptureFunc {
+	return lockedPowCapture(func(ctx context.Context, redirectURI string, dialer net.Dialer, profile browserprofile.Profile) (string, error) {
+		if hide != nil {
+			defer hide()
+		}
+		return manualcaptcha.CapturePowViaProxyWithPresenter(ctx, redirectURI, dialer, profile, show)
+	})
+}
+
+// DefaultPowCapture - захват PoW для CLI: страница открывается в системном браузере, с той же
+// очередью и паузой после сбоя, что и у ProxyPowCapture.
+func DefaultPowCapture(ctx context.Context, redirectURI string, dialer net.Dialer, profile browserprofile.Profile) (string, error) {
+	return lockedPowCapture(manualcaptcha.CapturePowViaProxy)(ctx, redirectURI, dialer, profile)
+}
+
+func lockedPowCapture(capture PowCaptureFunc) PowCaptureFunc {
 	return func(ctx context.Context, redirectURI string, dialer net.Dialer, profile browserprofile.Profile) (string, error) {
 		if redirectURI == "" {
 			return "", fmt.Errorf("browser pow capture: no redirect_uri")
@@ -54,10 +86,7 @@ func ProxyPowCapture(show func(url string), hide func()) PowCaptureFunc {
 			return "", fmt.Errorf("browser pow capture already in progress")
 		}
 		defer proxyManualMu.Unlock()
-		if hide != nil {
-			defer hide()
-		}
-		pow, err := manualcaptcha.CapturePowViaProxyWithPresenter(ctx, redirectURI, dialer, profile, show)
+		pow, err := capture(ctx, redirectURI, dialer, profile)
 		recordPowCaptureResult(err)
 		return pow, err
 	}
