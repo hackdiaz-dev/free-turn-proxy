@@ -80,8 +80,9 @@ func main() {
 	defer stop()
 
 	sess, err := session.New(cfg, session.Deps{
-		Logger: logger,
-		Solver: vk.DefaultManualSolver,
+		Logger:     logger,
+		Solver:     vk.DefaultManualSolver,
+		PowCapture: vk.DefaultPowCapture,
 	})
 	if err != nil {
 		logger.Errorf("%v", err)

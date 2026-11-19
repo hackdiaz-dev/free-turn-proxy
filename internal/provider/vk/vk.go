@@ -90,5 +90,10 @@ func DefaultManualSolver(ctx context.Context, e *captcha.Error, d net.Dialer, p 
 	if e.RedirectURI == "" {
 		return "", fmt.Errorf("no redirect_uri")
 	}
+	unlock, err := lockCaptchaPage(ctx)
+	if err != nil {
+		return "", err
+	}
+	defer unlock()
 	return manualcaptcha.SolveViaProxy(ctx, e.RedirectURI, d, p)
 }
