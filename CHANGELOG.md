@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.1](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.2.0...v4.2.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* **captcha:** one captcha page at a time in the CLI with several -links ([192880f](https://github.com/hackdiaz-dev/free-turn-proxy/commit/192880fb9f21a83e4c9dae9460cd18660179673c))
+
 ## [4.2.0](https://github.com/hackdiaz-dev/free-turn-proxy/compare/v4.1.5...v4.2.0) (2026-11-17)
 
 
