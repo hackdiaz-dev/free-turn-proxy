@@ -76,3 +76,4 @@ task clean          # удалить dist/, cover.out, cover.html
 - [@Moroka8](https://github.com/Moroka8)
 - [@alxmcp](https://github.com/alxmcp)
 - [@TheAirBlow](https://github.com/TheAirBlow)
+- [@1984Enjoyer](https://github.com/1984Enjoyer)
